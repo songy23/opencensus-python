@@ -47,11 +47,11 @@ class MeasurementMap(object):
         """associates the measure of type Float with the given value"""
         self._measurement_map[measure] = value
 
-    def record(self, tag_map_tags):
+    def record(self, tag_map):
         """records all the measures at the same time with an explicit tag_map
         """
         self.measure_to_view_map.record(
-                tags=tag_map_tags,
+                tag_map=tag_map,
                 measurement_map=self.measurement_map,
                 timestamp=datetime.utcnow().isoformat() + 'Z'
         )

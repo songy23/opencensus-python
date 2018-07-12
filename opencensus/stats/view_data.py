@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from opencensus.stats.aggregation_data import DistributionAggregationData
 from datetime import datetime
 import logging
 
@@ -71,14 +72,14 @@ class ViewData(object):
         """sets the end time for the view data"""
         self._end_time = datetime.utcnow().isoformat() + 'Z'
 
-    def get_tag_map(self, context):
-        """function to return the tag map based on the context"""
+    def get_tag_map(self, tag_map):
+        """function to return the tag map based on the tag_map"""
         if self.tag_map is not None:
-            if context.items() <= self.tag_map.items():
+            if tag_map.map.items() <= self.tag_map.items():
                 return self.tag_map
             else:
                 tags = self.tag_map
-                for tag_key, tag_value in context.items():
+                for tag_key, tag_value in tags.items():
                     tags[tag_key] = tag_value
                 return tags
         else:  # pragma: NO COVER
@@ -87,6 +88,8 @@ class ViewData(object):
     def get_tag_values(self, tags, columns):
         """function to get the tag values from tags and columns"""
         tag_values = []
+        if tags is None:
+            return tag_values
         i = 0
         while i < len(columns):
             tag_key = columns[i]
@@ -97,12 +100,13 @@ class ViewData(object):
             i += 1
         return tag_values
 
-    def record(self, context, value, timestamp):
-        """records the view data against context"""
-        tag_values = self.get_tag_values(tags=self.get_tag_map(context),
+    def record(self, tag_map, value, timestamp):
+        """records the view data against tags"""
+        tag_values = self.get_tag_values(tags=tag_map.map,
                                          columns=self.view.columns)
+        print(tag_values)
         tuple_vals = tuple(tag_values)
-        for val in tuple_vals:
-            if val not in self.tag_value_aggregation_map:
-                self.tag_value_aggregation_map[val] = self.view.aggregation
-            self.tag_value_aggregation_map.get(val).add(value)
+        if tuple_vals not in self.tag_value_aggregation_map:
+            self.tag_value_aggregation_map[tuple_vals] = \
+                DistributionAggregationData(0, 0, 0, 0, 0, [0], [])
+        self.tag_value_aggregation_map.get(tuple_vals).add_sample(value)
