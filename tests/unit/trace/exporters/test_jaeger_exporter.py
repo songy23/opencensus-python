@@ -180,7 +180,8 @@ class TestJaegerExporter(unittest.TestCase):
         span_attributes = {
             'key_bool': False,
             'key_string': 'hello_world',
-            'key_int': 3
+            'key_int': 3,
+            'key_double': 111.22
         }
 
         annotation_attributes = {
@@ -319,6 +320,10 @@ class TestJaegerExporter(unittest.TestCase):
                         vStr='hello_world'),
                     jaeger.Tag(
                         key='key_int', vType=jaeger.TagType.LONG, vLong=3),
+                    jaeger.Tag(
+                        key='key_double',
+                        vType=jaeger.TagType.DOUBLE,
+                        vStr=111.22),
                     jaeger.Tag(
                         key='status.code',
                         vType=jaeger.TagType.LONG,
